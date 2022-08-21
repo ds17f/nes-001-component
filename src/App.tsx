@@ -1,11 +1,11 @@
 import React from 'react';
 import './App.css';
-import {defaultNesControllerProps, NesController} from "./components/NesController";
+import {defaultPlayer1Controller, NesController} from "./components/NesController";
 
 function App() {
   return (
     <div className="App">
-      <NesController {...defaultNesControllerProps} />
+      <NesController {...defaultPlayer1Controller} />
     </div>
   );
 }

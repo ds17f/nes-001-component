@@ -12,25 +12,60 @@ interface NesControllerProps {
   dPadDown?: MouseClickHandlers;
   dPadLeft?: MouseClickHandlers;
   dPadRight?: MouseClickHandlers;
+  a?: MouseClickHandlers;
+  b?: MouseClickHandlers;
+  select?: MouseClickHandlers;
+  start?: MouseClickHandlers;
 }
 
-let upInterval: NodeJS.Timer | undefined = undefined;
-function testUp(e: MouseEvent) {
-  clearInterval(upInterval);
-}
-function testDown(e: MouseEvent) {
-  upInterval = setInterval(() => {
-    console.log("keypress up");
-    e.target?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
-  }, 4);
-}
+export const mouseToKeyPressHandlers = (
+  key: string,
+  interval: number = 4
+): MouseClickHandlers => {
+  let intervalTimer: NodeJS.Timer | undefined = undefined;
+  let originalColor: string | undefined = undefined;
+  return {
+    mouseDownHandler: (e: MouseEvent) => {
+      // @ts-ignore
+      originalColor = e.target.style.fill;
 
-export const defaultNesControllerProps: NesControllerProps = {
+      intervalTimer = setInterval(() => {
+        console.log(key);
+        e.target?.dispatchEvent(new KeyboardEvent("keydown", { key }));
+        // @ts-ignore
+        e.target.style.fill = "#00FF00";
+      }, interval);
+    },
+    mouseUpHandler: (e: MouseEvent) => {
+      // @ts-ignore
+      e.target.style.fill = originalColor;
+      clearInterval(intervalTimer);
+    }
+  };
+};
+
+export const defaultPlayer1Controller: NesControllerProps = {
   scalePercentage: 100,
-  dPadUp: {
-    mouseDownHandler: testDown,
-    mouseUpHandler: testUp
-  }
+  dPadUp: mouseToKeyPressHandlers("ArrowUp"),
+  dPadDown: mouseToKeyPressHandlers("ArrowDown"),
+  dPadRight: mouseToKeyPressHandlers("ArrowRight"),
+  dPadLeft: mouseToKeyPressHandlers("ArrowLeft"),
+  a: mouseToKeyPressHandlers("X"),
+  b: mouseToKeyPressHandlers("Z"),
+  start: mouseToKeyPressHandlers("Enter"),
+  select: mouseToKeyPressHandlers("ControlRight"),
+};
+
+export const defaultPlayer2Controller: NesControllerProps = {
+  scalePercentage: 100,
+  dPadUp: mouseToKeyPressHandlers("Numpad8"),
+  dPadDown: mouseToKeyPressHandlers("Numpad2"),
+  dPadRight: mouseToKeyPressHandlers("Numpad6"),
+  dPadLeft: mouseToKeyPressHandlers("Numpad4"),
+  a: mouseToKeyPressHandlers("Numpad7"),
+  b: mouseToKeyPressHandlers("Numpad9"),
+  start: mouseToKeyPressHandlers("Numpad1"),
+  select: mouseToKeyPressHandlers("Numpad3"),
 };
 
 const handleClick = () => {
@@ -42,7 +77,11 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
   dPadUp,
   dPadDown,
   dPadLeft,
-  dPadRight
+  dPadRight,
+  a,
+  b,
+  select,
+  start,
 }) => {
   return (
     <div style={{ top: 200 }}>
@@ -120,8 +159,8 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                 y="365"
                 height="35"
                 width="30"
-                onMouseUp={dPadUp?.mouseUpHandler}
-                onMouseDown={dPadUp?.mouseDownHandler}
+                onPointerUp={dPadUp?.mouseUpHandler}
+                onPointerDown={dPadUp?.mouseDownHandler}
               />
               <rect
                 id="dPadDownTouchPad"
@@ -130,8 +169,8 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                 y="438"
                 height="35"
                 width="30"
-                onMouseUp={dPadDown?.mouseUpHandler}
-                onMouseDown={dPadDown?.mouseDownHandler}
+                onPointerUp={dPadDown?.mouseUpHandler}
+                onPointerDown={dPadDown?.mouseDownHandler}
               />
               <rect
                 id="dPadLeftTouchPad"
@@ -140,8 +179,8 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                 y="404"
                 height="30"
                 width="35"
-                onMouseUp={dPadLeft?.mouseUpHandler}
-                onMouseDown={dPadLeft?.mouseDownHandler}
+                onPointerUp={dPadLeft?.mouseUpHandler}
+                onPointerDown={dPadLeft?.mouseDownHandler}
               />
               <rect
                 id="dPadRigthTouchPad"
@@ -150,8 +189,8 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                 y="404"
                 height="30"
                 width="35"
-                onMouseUp={dPadRight?.mouseUpHandler}
-                onMouseDown={dPadRight?.mouseDownHandler}
+                onPointerUp={dPadRight?.mouseUpHandler}
+                onPointerDown={dPadRight?.mouseDownHandler}
               />
               <g
                 id="g12011"
@@ -169,6 +208,8 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                   fill="#FF0000"
                   d="M363.54,496.875c0,5.402-4.379,9.78-9.78,9.78s-9.78-4.379-9.78-9.78
 					s4.379-9.78,9.78-9.78S363.54,491.473,363.54,496.875z"
+                  onPointerUp={b?.mouseUpHandler}
+                  onPointerDown={b?.mouseDownHandler}
                 />
               </g>
               <g
@@ -187,6 +228,8 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                   fill="#FF0000"
                   d="M390.65,496.875c0,5.402-4.379,9.78-9.78,9.78c-5.402,0-9.781-4.379-9.781-9.78
 					s4.379-9.78,9.781-9.78C386.271,487.094,390.65,491.473,390.65,496.875z"
+                  onPointerUp={a?.mouseUpHandler}
+                  onPointerDown={a?.mouseDownHandler}
                 />
               </g>
               <path
@@ -400,37 +443,39 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
               </g>
               <path
                 id="dPadLeftArrow"
-                fill="#1A1A1A"
                 stroke="#000000"
                 strokeWidth="0.5"
                 d="M63.181,408.339l-5.477,5.478l-5.477,5.477l5.477,5.478
 				l5.477,5.477v-3.286h10.954v-15.336H63.181V408.339z"
+                onPointerUp={dPadLeft?.mouseUpHandler}
+                onPointerDown={dPadLeft?.mouseDownHandler}
               />
               <path
                 id="dPadRightArrow"
-                fill="#1A1A1A"
                 stroke="#000000"
                 strokeWidth="0.5"
                 d="M139.683,408.339l5.477,5.478l5.477,5.477l-5.477,5.478
 				l-5.477,5.477v-3.286h-10.954v-15.336h10.954V408.339z"
+                onPointerUp={dPadRight?.mouseUpHandler}
+                onPointerDown={dPadRight?.mouseDownHandler}
               />
               <path
                 id="dPadUpArrow"
-                fill="#1A1A1A"
                 stroke="#000000"
                 strokeWidth="0.5"
                 d="M112.276,380.669l-5.477-5.477l-5.477-5.477
 				l-5.477,5.477l-5.477,5.477h3.286v10.954h15.336v-10.954H112.276z"
-                onMouseUp={dPadUp!.mouseUpHandler}
-                onMouseDown={dPadUp!.mouseDownHandler}
+                onPointerUp={dPadUp?.mouseUpHandler}
+                onPointerDown={dPadUp?.mouseDownHandler}
               />
               <path
                 id="dPadDownArrow"
-                fill="#1A1A1A"
                 stroke="#000000"
                 strokeWidth="0.5"
                 d="M112.276,458.333l-5.477,5.478l-5.477,5.477
 				l-5.477-5.477l-5.477-5.478h3.286v-10.954h15.336v10.954H112.276z"
+                onPointerUp={dPadDown?.mouseUpHandler}
+                onPointerDown={dPadDown?.mouseDownHandler}
               />
               <path
                 id="dPadMiddle"
@@ -447,12 +492,16 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                 fill="#1A1A1A"
                 d="M228.2,442.274h24.391c5.28,0,9.56,3.448,9.56,7.702l0,0c0,4.254-4.28,7.702-9.56,7.702
 				H228.2c-5.28,0-9.56-3.448-9.56-7.702l0,0C218.64,445.722,222.92,442.274,228.2,442.274z"
+                onPointerUp={select?.mouseUpHandler}
+                onPointerDown={select?.mouseDownHandler}
               />
               <path
                 id="startButtonInner"
                 fill="#1A1A1A"
                 d="M312.173,442.274h24.392c5.279,0,9.56,3.448,9.56,7.702l0,0c0,4.254-4.28,7.702-9.56,7.702
 				h-24.392c-5.279,0-9.56-3.448-9.56-7.702l0,0C302.613,445.722,306.893,442.274,312.173,442.274z"
+                onPointerUp={start?.mouseUpHandler}
+                onPointerDown={start?.mouseDownHandler}
               />
             </g>
           </g>
