@@ -8,22 +8,28 @@ interface MouseClickHandlers {
 
 interface NesControllerProps {
   scalePercentage: number;
-  dPad: MouseClickHandlers;
+  dPadUp?: MouseClickHandlers;
+  dPadDown?: MouseClickHandlers;
+  dPadLeft?: MouseClickHandlers;
+  dPadRight?: MouseClickHandlers;
 }
 
-function clickTest(e: MouseEvent) {
-  // @ts-ignore: SVGLocatable is removed: https://github.com/Microsoft/TypeScript/issues/15085
-  const { farthestViewportElement: svgRoot } = e.target;
-  const dim = svgRoot.getBoundingClientRect();
-  const x = e.clientX! - dim.left;
-  const y = e.clientY! - dim.top;
-  console.log(`x: ${x}, y: ${y}`);
+let upInterval: NodeJS.Timer | undefined = undefined;
+function testUp(e: MouseEvent) {
+  clearInterval(upInterval);
 }
+function testDown(e: MouseEvent) {
+  upInterval = setInterval(() => {
+    console.log("keypress up");
+    e.target?.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp" }));
+  }, 4);
+}
+
 export const defaultNesControllerProps: NesControllerProps = {
   scalePercentage: 100,
-  dPad: {
-    mouseDownHandler: clickTest,
-    mouseUpHandler: clickTest
+  dPadUp: {
+    mouseDownHandler: testDown,
+    mouseUpHandler: testUp
   }
 };
 
@@ -31,10 +37,12 @@ const handleClick = () => {
   console.log("Click");
 };
 
-
 export const NesController: FunctionComponent<NesControllerProps> = ({
   scalePercentage,
-  dPad
+  dPadUp,
+  dPadDown,
+  dPadLeft,
+  dPadRight
 }) => {
   return (
     <div style={{ top: 200 }}>
@@ -99,27 +107,65 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
               />
               <path
                 id="dPad"
-                onMouseDown={dPad.mouseDownHandler}
-                onMouseUp={dPad.mouseUpHandler}
                 fill="#1A1A1A"
                 d="M88.484,366.254c-0.85,0-1.506,0.657-1.506,1.506v36.832H50.146
 				c-0.849,0-1.506,0.656-1.506,1.506v25.948c0,0.85,0.657,1.574,1.506,1.574h36.832v36.765c0,0.849,0.657,1.574,1.506,1.574H114.5
 				c0.85,0,1.506-0.726,1.506-1.574V433.62h36.832c0.85,0,1.506-0.725,1.506-1.574v-25.948c0-0.85-0.657-1.506-1.506-1.506h-36.832
 				V367.76c0-0.85-0.656-1.506-1.506-1.506H88.484z"
               />
+              <rect
+                id="dPadUpTouchPad"
+                fill="#1A1A1A"
+                x="86"
+                y="365"
+                height="35"
+                width="30"
+                onMouseUp={dPadUp?.mouseUpHandler}
+                onMouseDown={dPadUp?.mouseDownHandler}
+              />
+              <rect
+                id="dPadDownTouchPad"
+                fill="#1A1A1A"
+                x="86"
+                y="438"
+                height="35"
+                width="30"
+                onMouseUp={dPadDown?.mouseUpHandler}
+                onMouseDown={dPadDown?.mouseDownHandler}
+              />
+              <rect
+                id="dPadLeftTouchPad"
+                fill="#1A1A1A"
+                x="48"
+                y="404"
+                height="30"
+                width="35"
+                onMouseUp={dPadLeft?.mouseUpHandler}
+                onMouseDown={dPadLeft?.mouseDownHandler}
+              />
+              <rect
+                id="dPadRigthTouchPad"
+                fill="#1A1A1A"
+                x="120"
+                y="404"
+                height="30"
+                width="35"
+                onMouseUp={dPadRight?.mouseUpHandler}
+                onMouseDown={dPadRight?.mouseDownHandler}
+              />
               <g
                 id="g12011"
                 transform="matrix(2.9042238,0,0,2.9042238,-597.29495,-994.37335)"
               >
                 <path
-                  id="rect11997"
+                  id="bButtonBorder"
                   fill="#DDDDDD"
                   d="M343.472,484.842h20.578c0.908,0,1.643,0.736,1.643,1.643v20.578
 					c0,0.907-0.735,1.643-1.643,1.643h-20.578c-0.908,0-1.643-0.736-1.643-1.643v-20.578
 					C341.829,485.577,342.565,484.842,343.472,484.842z"
                 />
                 <path
-                  id="path12001"
+                  id="bButton"
                   fill="#FF0000"
                   d="M363.54,496.875c0,5.402-4.379,9.78-9.78,9.78s-9.78-4.379-9.78-9.78
 					s4.379-9.78,9.78-9.78S363.54,491.473,363.54,496.875z"
@@ -130,35 +176,35 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                 transform="matrix(2.9042238,0,0,2.9042238,-597.29495,-994.37335)"
               >
                 <path
-                  id="rect12003"
+                  id="aButtonBorder"
                   fill="#DDDDDD"
                   d="M370.572,484.842h20.578c0.907,0,1.643,0.736,1.643,1.643v20.578
 					c0,0.907-0.736,1.643-1.643,1.643h-20.578c-0.908,0-1.643-0.736-1.643-1.643v-20.578
 					C368.929,485.577,369.665,484.842,370.572,484.842z"
                 />
                 <path
-                  id="path12005"
+                  id="aButton"
                   fill="#FF0000"
                   d="M390.65,496.875c0,5.402-4.379,9.78-9.78,9.78c-5.402,0-9.781-4.379-9.781-9.78
 					s4.379-9.78,9.781-9.78C386.271,487.094,390.65,491.473,390.65,496.875z"
                 />
               </g>
               <path
-                id="rect12205"
+                id="selectStartTextBackground"
                 fill="#808080"
                 d="M205.958,382.312h153.281c5.362,0,9.709,4.347,9.709,9.709v10.594
 				c0,5.362-4.347,9.709-9.709,9.709H205.958c-5.362,0-9.709-4.347-9.709-9.709v-10.594
 				C196.249,386.659,200.597,382.312,205.958,382.312z"
               />
               <path
-                id="rect12199"
+                id="selectStartButtonBackground"
                 fill="#DDDDDD"
                 d="M207.071,420.454h151.087c5.976,0,10.82,4.845,10.82,10.821v35.343
 				c0,5.977-4.845,10.821-10.82,10.821H207.071c-5.977,0-10.821-4.845-10.821-10.821v-35.343
 				C196.249,425.299,201.094,420.454,207.071,420.454z"
               />
               <path
-                id="rect12207"
+                id="selectStartButtonBackgroundBorder"
                 fill="none"
                 stroke="#808080"
                 strokeWidth="1.4584"
@@ -177,7 +223,7 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                 d="M309.676,440.412h29.395c5.28,0,9.561,4.28,9.561,9.561l0,0c0,5.279-4.28,9.56-9.561,9.56h-29.395
 				c-5.28,0-9.561-4.28-9.561-9.56l0,0C300.115,444.692,304.395,440.412,309.676,440.412z"
               />
-              <g>
+              <g id="nintendoText">
                 <path
                   id="path6991"
                   fill="#FE0016"
@@ -262,7 +308,7 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
 					c-0.178-0.089-0.445-0.131-0.742-0.131h-1.843v3.971H527.025"
                 />
               </g>
-              <g id="text2887">
+              <g id="selectText">
                 <path
                   id="path2921"
                   fill="#FF0000"
@@ -301,7 +347,7 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                   d="M267.328,392.954h11.179v2.236h-4.472v7.825h-2.235v-7.825h-4.472V392.954z"
                 />
               </g>
-              <g id="text2891">
+              <g id="startText">
                 <path
                   id="path2934"
                   fill="#FF0000"
@@ -334,7 +380,7 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                   d="M347.839,392.954h11.179v2.236h-4.472v7.825h-2.235v-7.825h-4.472V392.954z"
                 />
               </g>
-              <g id="text2895">
+              <g id="bText">
                 <path
                   id="path2945"
                   fill="#FF0000"
@@ -343,7 +389,7 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
 					c0.428,0.588,0.642,1.377,0.642,2.366c0,2.434-1.337,3.65-4.011,3.65H454.389z"
                 />
               </g>
-              <g id="text2903">
+              <g id="aText">
                 <path
                   id="path2948"
                   fill="#FF0000"
@@ -353,39 +399,41 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
                 />
               </g>
               <path
-                id="path2950"
-                fill="none"
+                id="dPadLeftArrow"
+                fill="#1A1A1A"
                 stroke="#000000"
                 strokeWidth="0.5"
                 d="M63.181,408.339l-5.477,5.478l-5.477,5.477l5.477,5.478
 				l5.477,5.477v-3.286h10.954v-15.336H63.181V408.339z"
               />
               <path
-                id="path3727"
-                fill="none"
+                id="dPadRightArrow"
+                fill="#1A1A1A"
                 stroke="#000000"
                 strokeWidth="0.5"
                 d="M139.683,408.339l5.477,5.478l5.477,5.477l-5.477,5.478
 				l-5.477,5.477v-3.286h-10.954v-15.336h10.954V408.339z"
               />
               <path
-                id="path3729"
-                fill="none"
+                id="dPadUpArrow"
+                fill="#1A1A1A"
                 stroke="#000000"
                 strokeWidth="0.5"
                 d="M112.276,380.669l-5.477-5.477l-5.477-5.477
 				l-5.477,5.477l-5.477,5.477h3.286v10.954h15.336v-10.954H112.276z"
+                onMouseUp={dPadUp!.mouseUpHandler}
+                onMouseDown={dPadUp!.mouseDownHandler}
               />
               <path
-                id="path3731"
-                fill="none"
+                id="dPadDownArrow"
+                fill="#1A1A1A"
                 stroke="#000000"
                 strokeWidth="0.5"
                 d="M112.276,458.333l-5.477,5.478l-5.477,5.477
 				l-5.477-5.477l-5.477-5.478h3.286v-10.954h15.336v10.954H112.276z"
               />
               <path
-                id="path3763"
+                id="dPadMiddle"
                 fill="none"
                 stroke="#000000"
                 strokeWidth="0.7366"
@@ -395,13 +443,13 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
 				C114.646,419.099,114.646,419.105,114.646,419.111z"
               />
               <path
-                id="rect3789"
+                id="selectButtonInner"
                 fill="#1A1A1A"
                 d="M228.2,442.274h24.391c5.28,0,9.56,3.448,9.56,7.702l0,0c0,4.254-4.28,7.702-9.56,7.702
 				H228.2c-5.28,0-9.56-3.448-9.56-7.702l0,0C218.64,445.722,222.92,442.274,228.2,442.274z"
               />
               <path
-                id="rect3791"
+                id="startButtonInner"
                 fill="#1A1A1A"
                 d="M312.173,442.274h24.392c5.279,0,9.56,3.448,9.56,7.702l0,0c0,4.254-4.28,7.702-9.56,7.702
 				h-24.392c-5.279,0-9.56-3.448-9.56-7.702l0,0C302.613,445.722,306.893,442.274,312.173,442.274z"
