@@ -1,5 +1,5 @@
 import React, { FunctionComponent, MouseEventHandler } from "react"; // importing FunctionComponent
-import { SyntheticEventData } from "react-dom/test-utils";
+import "./NesController.css";
 
 interface TouchHandlers {
   touchStartHandler?: any;
@@ -76,7 +76,7 @@ const handleClick = () => {
   console.log("Click");
 };
 
-export const NesController: FunctionComponent<NesControllerProps> = ({
+const NesController: FunctionComponent<NesControllerProps> = ({
   scalePercentage,
   dPadUp,
   dPadDown,
@@ -526,3 +526,5 @@ export const NesController: FunctionComponent<NesControllerProps> = ({
     </div>
   );
 };
+
+export default NesController;
