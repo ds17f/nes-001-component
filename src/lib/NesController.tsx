@@ -1,13 +1,16 @@
-import React, { FunctionComponent, MouseEventHandler } from "react"; // importing FunctionComponent
-import "./NesController.css";
+import React, {
+  FunctionComponent,
+  SyntheticEvent,
+} from "react"; // importing FunctionComponent
 
 interface TouchHandlers {
-  touchStartHandler?: any;
-  touchEndHandler?: any;
+  touchStartHandler?: ButtonTouchAction;
+  touchEndHandler?: ButtonTouchAction;
 }
 
 interface NesControllerProps {
   scalePercentage: number;
+  highlightOnTouch: boolean;
   dPadUp?: TouchHandlers;
   dPadDown?: TouchHandlers;
   dPadLeft?: TouchHandlers;
@@ -18,66 +21,57 @@ interface NesControllerProps {
   start?: TouchHandlers;
 }
 
-export const mouseToKeyPressHandlers = (
-  key: string,
-  interval: number = 4
+interface ButtonTouchAction {
+  (e: SyntheticEvent): void;
+}
+
+export const nesButtonTouchHandlers = (
+  touchStartHandler: ButtonTouchAction,
+  touchEndHandler: ButtonTouchAction
 ): TouchHandlers => {
-  let intervalTimer: NodeJS.Timer | undefined = undefined;
-  let originalColor: string | undefined = undefined;
   return {
-    touchStartHandler: (e: TouchEvent) => {
+    touchStartHandler: (e: SyntheticEvent) => {
+      e.persist();
+      touchStartHandler(e);
       e.preventDefault();
-
-      // @ts-ignore
-      originalColor = e.target.style.fill;
-
-      intervalTimer = setInterval(() => {
-        console.log(key);
-        e.target?.dispatchEvent(new KeyboardEvent("keydown", { key }));
-        // @ts-ignore
-        e.target.style.fill = "#00FF00";
-      }, interval);
     },
-    touchEndHandler: (e: TouchEvent) => {
+    touchEndHandler: (e: SyntheticEvent) => {
+      e.persist();
+      touchEndHandler(e);
       e.preventDefault();
-
-      // @ts-ignore
-      e.target.style.fill = originalColor;
-      clearInterval(intervalTimer);
     }
   };
 };
 
-export const defaultPlayer1Controller: NesControllerProps = {
-  scalePercentage: 100,
-  dPadUp: mouseToKeyPressHandlers("ArrowUp"),
-  dPadDown: mouseToKeyPressHandlers("ArrowDown"),
-  dPadRight: mouseToKeyPressHandlers("ArrowRight"),
-  dPadLeft: mouseToKeyPressHandlers("ArrowLeft"),
-  a: mouseToKeyPressHandlers("X"),
-  b: mouseToKeyPressHandlers("Z"),
-  start: mouseToKeyPressHandlers("Enter"),
-  select: mouseToKeyPressHandlers("ControlRight")
+const addHighlight = (handlers?: TouchHandlers): TouchHandlers => {
+  let originalColor: string | undefined = undefined;
+  return {
+    touchStartHandler: (e: SyntheticEvent) => {
+      e.persist();
+      // @ts-ignore
+      originalColor = e.target.style.fill;
+      // @ts-ignore
+      e.target.style.fill = "#00FF00";
+      if (handlers && handlers.touchStartHandler) {
+        handlers.touchStartHandler(e);
+      }
+      e.preventDefault();
+    },
+    touchEndHandler: (e: SyntheticEvent) => {
+      e.persist();
+      // @ts-ignore
+      e.target.style.fill = originalColor;
+      if (handlers && handlers.touchEndHandler) {
+        handlers.touchEndHandler(e);
+      }
+      e.preventDefault();
+    }
+  };
 };
 
-export const defaultPlayer2Controller: NesControllerProps = {
-  scalePercentage: 100,
-  dPadUp: mouseToKeyPressHandlers("Numpad8"),
-  dPadDown: mouseToKeyPressHandlers("Numpad2"),
-  dPadRight: mouseToKeyPressHandlers("Numpad6"),
-  dPadLeft: mouseToKeyPressHandlers("Numpad4"),
-  a: mouseToKeyPressHandlers("Numpad7"),
-  b: mouseToKeyPressHandlers("Numpad9"),
-  start: mouseToKeyPressHandlers("Numpad1"),
-  select: mouseToKeyPressHandlers("Numpad3")
-};
-
-const handleClick = () => {
-  console.log("Click");
-};
-
-const NesController: FunctionComponent<NesControllerProps> = ({
+export const NesController: FunctionComponent<NesControllerProps> = ({
   scalePercentage,
+  highlightOnTouch,
   dPadUp,
   dPadDown,
   dPadLeft,
@@ -87,6 +81,17 @@ const NesController: FunctionComponent<NesControllerProps> = ({
   select,
   start
 }) => {
+  if (highlightOnTouch) {
+    dPadUp = addHighlight(dPadUp);
+    dPadDown = addHighlight(dPadDown);
+    dPadLeft = addHighlight(dPadLeft);
+    dPadRight = addHighlight(dPadRight);
+    a = addHighlight(a);
+    b = addHighlight(b);
+    select = addHighlight(select);
+    start = addHighlight(start);
+  }
+
   return (
     <div>
       <svg
@@ -526,5 +531,3 @@ const NesController: FunctionComponent<NesControllerProps> = ({
     </div>
   );
 };
-
-export default NesController;

@@ -1,2 +1,2 @@
-import NesController from "./NesController";
-export { NesController };
+import { NesController, nesButtonTouchHandlers } from "./NesController";
+export { NesController, nesButtonTouchHandlers };
