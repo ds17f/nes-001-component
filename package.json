@@ -1,12 +1,12 @@
 {
-  "name": "dsc-nes-controller",
+  "name": "nes-001-component",
   "version": "0.1.0",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "files": [ "dist", "README.md" ],
   "repository": {
     "type": "git",
-    "url": "URL_OF_YOUR_REPOSITORY"
+    "url": "https://github.com/ds17f/nes-001-component"
   },
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
